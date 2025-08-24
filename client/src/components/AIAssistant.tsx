@@ -38,15 +38,15 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
       const welcomeMessage: Message = {
         id: '1',
         type: 'ai',
-        content: "Hi! I'm your 3D modeling assistant. I can help you create and modify 3D objects using natural language commands. Try saying something like 'Create a red cube' or 'Make the selected object bigger'.",
+        content: "Welcome to Precision Build AI! I'm your intelligent 3D modeling assistant. I can help you create professional 3D models using simple natural language commands. Try commands like 'Create a red cube', 'Make it bigger', or 'Build a house'. I can also help you work with imported models!",
         timestamp: new Date(),
         suggestions: [
           "Create a red cube",
           "Add a blue sphere",
           "Make it bigger",
           "Change color to green",
-          "Create a house",
-          "Show me what you can do"
+          "Build a simple house",
+          "Import a 3D model"
         ]
       };
       setMessages([welcomeMessage]);
@@ -99,7 +99,7 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
             switch (commandResult.action.type) {
               case 'create':
                 const newObj = createObject({
-                  type: commandResult.action.shape,
+                  type: commandResult.action.shape as any,
                   color: commandResult.action.color || '#666666',
                   position: commandResult.action.position || { x: 0, y: 1, z: 0 },
                   scale: commandResult.action.scale || { x: 1, y: 1, z: 1 },
@@ -167,8 +167,10 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
       <DialogContent className="max-w-2xl max-h-[80vh] bg-gray-900 border-gray-700 text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Bot className="text-blue-500" size={24} />
-            AI 3D Modeling Assistant
+            <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded flex items-center justify-center">
+              <span className="text-white font-bold text-xs">P</span>
+            </div>
+            Precision Build AI Assistant
           </DialogTitle>
         </DialogHeader>
 

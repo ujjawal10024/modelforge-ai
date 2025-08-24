@@ -34,7 +34,7 @@ export function Toolbar({ onShowAI, onShowImporter }: ToolbarProps) {
 
   const createShape = (type: string, color: string = '#666666') => {
     createObject({
-      type,
+      type: type as any,
       color,
       position: { x: Math.random() * 4 - 2, y: 1, z: Math.random() * 4 - 2 },
       scale: { x: 1, y: 1, z: 1 },

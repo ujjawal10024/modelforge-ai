@@ -62,31 +62,73 @@ export function ModelViewer({ object, isSelected, onSelect }: ModelViewerProps) 
     try {
       const { scene } = useGLTF(object.modelPath);
       
+      // Clone and prepare the scene
+      const clonedScene = scene.clone();
+      
+      // Set up shadows for all meshes in the imported model
+      clonedScene.traverse((child: any) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          // Preserve original materials but ensure proper rendering
+          if (child.material) {
+            child.material.needsUpdate = true;
+          }
+        }
+      });
+
       return (
-        <primitive
-          ref={meshRef}
-          object={scene.clone()}
+        <group
           position={[object.position.x, object.position.y, object.position.z]}
           rotation={[object.rotation.x, object.rotation.y, object.rotation.z]}
           scale={[object.scale.x, object.scale.y, object.scale.z]}
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect();
-          }}
-          onPointerOver={(e) => {
-            e.stopPropagation();
-            setHovered(true);
-            document.body.style.cursor = 'pointer';
-          }}
-          onPointerOut={(e) => {
-            e.stopPropagation();
-            setHovered(false);
-            document.body.style.cursor = 'auto';
-          }}
-          castShadow
-          receiveShadow
           data-object-id={object.id}
-        />
+        >
+          <primitive
+            ref={meshRef}
+            object={clonedScene}
+            onClick={(e: any) => {
+              e.stopPropagation();
+              onSelect();
+            }}
+            onPointerOver={(e: any) => {
+              e.stopPropagation();
+              setHovered(true);
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e: any) => {
+              e.stopPropagation();
+              setHovered(false);
+              document.body.style.cursor = 'auto';
+            }}
+          />
+          
+          {/* Selection outline for imported models */}
+          {isSelected && (
+            <mesh>
+              <boxGeometry args={[2, 2, 2]} />
+              <meshBasicMaterial
+                color="#00ff00"
+                transparent
+                opacity={0.2}
+                wireframe
+              />
+            </mesh>
+          )}
+
+          {/* Object label */}
+          {(isSelected || hovered) && (
+            <Text
+              position={[0, 2, 0]}
+              fontSize={0.3}
+              color="#ffffff"
+              anchorX="center"
+              anchorY="middle"
+            >
+              {object.name || `imported ${object.id.slice(-4)}`}
+            </Text>
+          )}
+        </group>
       );
     } catch (error) {
       console.error('Failed to load model:', object.modelPath, error);

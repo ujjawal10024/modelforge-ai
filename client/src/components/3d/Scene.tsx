@@ -72,7 +72,7 @@ export function Scene() {
       
       objects.forEach(obj => {
         const distance = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z).distanceTo(clickedPoint);
-        if (distance < closestDistance) {
+        if (distance < closestDistance && distance < 2) { // Add proximity threshold
           closestDistance = distance;
           closestObject = obj;
         }

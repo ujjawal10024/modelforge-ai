@@ -83,23 +83,25 @@ export function ModelImporter({ isOpen, onClose }: ModelImporterProps) {
         prev.map(f => f.name === fileInfo.name ? { ...f, status: 'loading' } : f)
       );
 
-      // Simulate upload progress
-      for (let i = 0; i <= 100; i += 10) {
+      // Create a blob URL for the file with proper MIME type
+      const objectUrl = URL.createObjectURL(new Blob([file], { 
+        type: file.type || 'model/gltf-binary' 
+      }));
+      
+      // Simulate upload progress for user feedback
+      for (let i = 0; i <= 100; i += 20) {
         setUploadProgress(i);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 150));
       }
 
-      // Create object URL for the file
-      const objectUrl = URL.createObjectURL(file);
-      
-      // Create a new 3D object in the scene
+      // Create a new 3D object in the scene with proper scaling
       const newObject = createObject({
         type: 'imported',
         modelPath: objectUrl,
         name: file.name.split('.')[0],
         color: '#ffffff',
-        position: { x: 0, y: 1, z: 0 },
-        scale: { x: 1, y: 1, z: 1 },
+        position: { x: 0, y: 0, z: 0 }, // Start at ground level
+        scale: { x: 2.5, y: 2.5, z: 2.5 }, // Scale up for better visibility
         rotation: { x: 0, y: 0, z: 0 }
       });
 
@@ -114,6 +116,8 @@ export function ModelImporter({ isOpen, onClose }: ModelImporterProps) {
 
       playSuccess();
       setUploadProgress(0);
+      
+      console.log('Successfully imported model:', file.name, 'with URL:', objectUrl);
       
     } catch (error) {
       console.error('File processing failed:', error);
@@ -305,8 +309,9 @@ export function ModelImporter({ isOpen, onClose }: ModelImporterProps) {
           <Alert className="bg-blue-900/50 border-blue-700">
             <AlertCircle size={16} />
             <AlertDescription className="text-sm">
-              <strong>Tips:</strong> GLTF/GLB files work best for web display. 
-              Imported models will appear at the center of the scene and can be selected and manipulated like other objects.
+              <strong>Precision Build AI Tips:</strong> GLB files from Sketchfab work perfectly! 
+              Models are automatically scaled 2.5x for better visibility and preserve all original materials and textures.
+              Imported models can be selected, moved, rotated, and scaled just like any other object.
             </AlertDescription>
           </Alert>
         </div>

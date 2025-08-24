@@ -63,7 +63,7 @@ export function CommandPanel() {
         switch (result.action.type) {
           case 'create':
             const newObject = createObject({
-              type: result.action.shape,
+              type: result.action.shape as any,
               color: result.action.color || '#666666',
               position: result.action.position || { x: 0, y: 1, z: 0 },
               scale: result.action.scale || { x: 1, y: 1, z: 1 },
