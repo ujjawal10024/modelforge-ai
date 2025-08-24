@@ -117,10 +117,7 @@ export function ModelImporter({ isOpen, onClose }: ModelImporterProps) {
       playSuccess();
       setUploadProgress(0);
       
-      console.log('Successfully imported model:', file.name, 'with URL:', objectUrl);
-      
     } catch (error) {
-      console.error('File processing failed:', error);
       
       setFiles(prev =>
         prev.map(f => f.name === fileInfo.name ? {

@@ -146,7 +146,6 @@ function ImportedGLBModel({
     const { scene } = useGLTF(object.modelPath!);
     
     if (!scene) {
-      console.warn('GLB scene not loaded');
       return <FallbackModel object={object} isSelected={isSelected} onSelect={onSelect} hovered={hovered} setHovered={setHovered} />;
     }
 
@@ -217,7 +216,6 @@ function ImportedGLBModel({
       </group>
     );
   } catch (error) {
-    console.error('GLB loading failed:', error);
     return <FallbackModel object={object} isSelected={isSelected} onSelect={onSelect} hovered={hovered} setHovered={setHovered} />;
   }
 }
