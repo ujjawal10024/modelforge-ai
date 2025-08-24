@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useState, useCallback } from "react";
 import "@fontsource/inter";
-import { Scene } from "./components/3d/Scene";
+import { SimpleScene } from "./components/3d/SimpleScene";
 import { CommandPanel } from "./components/CommandPanel";
 import { AIAssistant } from "./components/AIAssistant";
 import { ModelImporter } from "./components/ModelImporter";
@@ -121,7 +121,7 @@ function App() {
         >
           <color attach="background" args={["#0f0f23"]} />
           <Suspense fallback={null}>
-            <Scene />
+            <SimpleScene />
           </Suspense>
         </Canvas>
       </div>

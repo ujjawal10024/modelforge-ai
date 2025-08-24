@@ -1,8 +1,11 @@
 import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF, useFBX, Text } from "@react-three/drei";
+import { useGLTF, Text } from "@react-three/drei";
 import * as THREE from "three";
 import { ModelingObject } from "../../types/modeling";
+
+// Preload common models to avoid loading errors
+useGLTF.preload('/models/fallback.glb');
 
 interface ModelViewerProps {
   object: ModelingObject;
@@ -57,83 +60,9 @@ export function ModelViewer({ object, isSelected, onSelect }: ModelViewerProps) 
     );
   };
 
-  // Handle imported models (GLTF/GLB)
+  // Handle imported models (GLTF/GLB) with robust error handling
   if (object.type === 'imported' && object.modelPath) {
-    try {
-      const { scene } = useGLTF(object.modelPath);
-      
-      // Clone and prepare the scene
-      const clonedScene = scene.clone();
-      
-      // Set up shadows for all meshes in the imported model
-      clonedScene.traverse((child: any) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-          // Preserve original materials but ensure proper rendering
-          if (child.material) {
-            child.material.needsUpdate = true;
-          }
-        }
-      });
-
-      return (
-        <group
-          position={[object.position.x, object.position.y, object.position.z]}
-          rotation={[object.rotation.x, object.rotation.y, object.rotation.z]}
-          scale={[object.scale.x, object.scale.y, object.scale.z]}
-          data-object-id={object.id}
-        >
-          <primitive
-            ref={meshRef}
-            object={clonedScene}
-            onClick={(e: any) => {
-              e.stopPropagation();
-              onSelect();
-            }}
-            onPointerOver={(e: any) => {
-              e.stopPropagation();
-              setHovered(true);
-              document.body.style.cursor = 'pointer';
-            }}
-            onPointerOut={(e: any) => {
-              e.stopPropagation();
-              setHovered(false);
-              document.body.style.cursor = 'auto';
-            }}
-          />
-          
-          {/* Selection outline for imported models */}
-          {isSelected && (
-            <mesh>
-              <boxGeometry args={[2, 2, 2]} />
-              <meshBasicMaterial
-                color="#00ff00"
-                transparent
-                opacity={0.2}
-                wireframe
-              />
-            </mesh>
-          )}
-
-          {/* Object label */}
-          {(isSelected || hovered) && (
-            <Text
-              position={[0, 2, 0]}
-              fontSize={0.3}
-              color="#ffffff"
-              anchorX="center"
-              anchorY="middle"
-            >
-              {object.name || `imported ${object.id.slice(-4)}`}
-            </Text>
-          )}
-        </group>
-      );
-    } catch (error) {
-      console.error('Failed to load model:', object.modelPath, error);
-      // Fallback to a cube if model loading fails
-    }
+    return <ImportedModel object={object} isSelected={isSelected} onSelect={onSelect} hovered={hovered} setHovered={setHovered} meshRef={meshRef} />;
   }
 
   return (
@@ -193,4 +122,130 @@ export function ModelViewer({ object, isSelected, onSelect }: ModelViewerProps) 
       )}
     </group>
   );
+}
+
+// Separate component for imported models to handle errors better
+function ImportedModel({ object, isSelected, onSelect, hovered, setHovered, meshRef }: {
+  object: ModelingObject;
+  isSelected: boolean;
+  onSelect: () => void;
+  hovered: boolean;
+  setHovered: (hovered: boolean) => void;
+  meshRef: React.RefObject<THREE.Mesh>;
+}) {
+  try {
+    const gltf = useGLTF(object.modelPath!);
+    
+    if (!gltf?.scene) {
+      throw new Error('Invalid GLTF model');
+    }
+    
+    const clonedScene = gltf.scene.clone();
+    
+    // Set up shadows and materials
+    clonedScene.traverse((child: any) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        if (child.material) {
+          child.material.needsUpdate = true;
+        }
+      }
+    });
+
+    return (
+      <group
+        position={[object.position.x, object.position.y, object.position.z]}
+        rotation={[object.rotation.x, object.rotation.y, object.rotation.z]}
+        scale={[object.scale.x, object.scale.y, object.scale.z]}
+        data-object-id={object.id}
+      >
+        <primitive
+          object={clonedScene}
+          onClick={(e: any) => {
+            e.stopPropagation();
+            onSelect();
+          }}
+          onPointerOver={(e: any) => {
+            e.stopPropagation();
+            setHovered(true);
+            document.body.style.cursor = 'pointer';
+          }}
+          onPointerOut={(e: any) => {
+            e.stopPropagation();
+            setHovered(false);
+            document.body.style.cursor = 'auto';
+          }}
+        />
+        
+        {/* Selection outline */}
+        {isSelected && (
+          <mesh>
+            <boxGeometry args={[3, 3, 3]} />
+            <meshBasicMaterial
+              color="#00ff00"
+              transparent
+              opacity={0.15}
+              wireframe
+            />
+          </mesh>
+        )}
+
+        {/* Object label */}
+        {(isSelected || hovered) && (
+          <Text
+            position={[0, 2.5, 0]}
+            fontSize={0.3}
+            color="#ffffff"
+            anchorX="center"
+            anchorY="middle"
+          >
+            {object.name || `Model ${object.id.slice(-4)}`}
+          </Text>
+        )}
+      </group>
+    );
+  } catch (error) {
+    console.error('Model loading failed:', error);
+    
+    // Fallback display for failed imports
+    return (
+      <group
+        position={[object.position.x, object.position.y, object.position.z]}
+        rotation={[object.rotation.x, object.rotation.y, object.rotation.z]}
+        scale={[object.scale.x, object.scale.y, object.scale.z]}
+        data-object-id={object.id}
+      >
+        <mesh
+          onClick={(e: any) => {
+            e.stopPropagation();
+            onSelect();
+          }}
+          onPointerOver={(e: any) => {
+            e.stopPropagation();
+            setHovered(true);
+            document.body.style.cursor = 'pointer';
+          }}
+          onPointerOut={(e: any) => {
+            e.stopPropagation();
+            setHovered(false);
+            document.body.style.cursor = 'auto';
+          }}
+        >
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="#ff6b6b" />
+        </mesh>
+        
+        <Text
+          position={[0, 1.5, 0]}
+          fontSize={0.2}
+          color="#ffffff"
+          anchorX="center"
+          anchorY="middle"
+        >
+          Model Load Failed
+        </Text>
+      </group>
+    );
+  }
 }

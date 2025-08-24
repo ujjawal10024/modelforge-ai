@@ -41,50 +41,10 @@ export function Scene() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedObject, dragMode, selectObject]);
 
-  // Handle mouse/touch interactions
+  // Handle mouse/touch interactions - simplified for better performance
   const handlePointerDown = (event: any) => {
-    if (event.button !== 0) return; // Only left click
-    
-    const pointer = new THREE.Vector2();
-    pointer.x = (event.clientX / gl.domElement.clientWidth) * 2 - 1;
-    pointer.y = -(event.clientY / gl.domElement.clientHeight) * 2 + 1;
-    
-    raycaster.setFromCamera(pointer, camera);
-    
-    // Check for intersections with scene objects
-    const meshes: THREE.Mesh[] = [];
-    objects.forEach(obj => {
-      const sceneObj = gl.domElement.parentElement?.querySelector(`[data-object-id="${obj.id}"]`);
-      if (sceneObj) {
-        // This would need to be implemented differently in a real scenario
-        // For now, we'll use a simplified selection mechanism
-      }
-    });
-    
-    // For demo purposes, let's implement basic click-to-select
-    const intersects = raycaster.intersectObjects(gl.domElement.parentElement?.querySelectorAll('mesh') as any || []);
-    
-    if (intersects.length > 0) {
-      // Find which object was clicked based on position
-      const clickedPoint = intersects[0].point;
-      let closestObject = null;
-      let closestDistance = Infinity;
-      
-      objects.forEach(obj => {
-        const distance = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z).distanceTo(clickedPoint);
-        if (distance < closestDistance && distance < 2) { // Add proximity threshold
-          closestDistance = distance;
-          closestObject = obj;
-        }
-      });
-      
-      if (closestObject) {
-        selectObject(closestObject.id);
-        playHit();
-      }
-    } else {
-      selectObject(null);
-    }
+    // Object selection is now handled directly in ModelViewer components
+    // This prevents conflicts and improves performance
   };
 
   return (
@@ -158,11 +118,7 @@ export function Scene() {
         target={[0, 0, 0]}
       />
       
-      {/* Add pointer events to canvas */}
-      <primitive 
-        object={gl.domElement} 
-        onPointerDown={handlePointerDown}
-      />
+      {/* Canvas pointer events handled by individual objects */}
     </>
   );
 }
