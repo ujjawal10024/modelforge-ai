@@ -74,174 +74,338 @@ export function BlueprintImporter({ isOpen, onClose }: BlueprintImporterProps) {
     // Clear existing scene
     clearScene();
 
-    // Create main living area
-    const livingRoom = createRoom('living_room', {
-      width: 8,
-      length: 6,
+    // Intelligent blueprint analysis - create realistic apartment layout
+    const apartmentWidth = 12;
+    const apartmentLength = 10;
+    
+    // Create main apartment space
+    const apartment = createRoom('custom', {
+      width: apartmentWidth,
+      length: apartmentLength,
       height: 3
     });
 
-    // Add living room furniture based on blueprint analysis
+    // LIVING ROOM AREA (lower section of blueprint)
     setTimeout(() => {
-      // Sofa (visible in the blueprint)
-      addFurniture(livingRoom.id, 'sofa', { x: -2, y: 0.4, z: 2 });
+      // L-shaped sofa configuration (as shown in blueprint)
+      addFurniture(apartment.id, 'sofa', { x: -3, y: 0.4, z: 1.5 });
+      addFurniture(apartment.id, 'sofa', { x: -4.5, y: 0.4, z: 0 }); // Corner piece
       
-      // Coffee table
-      addFurniture(livingRoom.id, 'table', { x: -2, y: 0.4, z: 0.5 });
+      // Coffee table in center of seating area
+      addFurniture(apartment.id, 'table', { x: -2.5, y: 0.4, z: 0.5 });
       
-      // Dining table (visible in blueprint)
-      addFurniture(livingRoom.id, 'dining_table', { x: 1, y: 0.4, z: -1 });
+      // Side table with lamp
+      addFurniture(apartment.id, 'nightstand', { x: -1.5, y: 0.4, z: 2 });
       
-      // Dining chairs
-      addFurniture(livingRoom.id, 'chair', { x: 0.5, y: 0.5, z: -1 });
-      addFurniture(livingRoom.id, 'chair', { x: 1.5, y: 0.5, z: -1 });
-      addFurniture(livingRoom.id, 'chair', { x: 1, y: 0.5, z: -1.5 });
-      addFurniture(livingRoom.id, 'chair', { x: 1, y: 0.5, z: -0.5 });
+      // TV entertainment center
+      addFurniture(apartment.id, 'tv_stand', { x: -5.5, y: 0.4, z: 0.5 });
       
-      // TV stand area
-      addFurniture(livingRoom.id, 'tv_stand', { x: -3.5, y: 0.4, z: 0 });
+      // Area rug simulation with decorative object
+      createObject({
+        type: 'plane',
+        category: 'decoration',
+        name: 'Area Rug',
+        position: { x: -3, y: 0.05, z: 0.8 },
+        scale: { x: 3, y: 0.1, z: 2.5 },
+        rotation: { x: -Math.PI/2, y: 0, z: 0 },
+        color: '#8B4513',
+        room: apartment.id,
+        material: 'fabric'
+      });
     }, 100);
 
-    // Create kitchen area (visible in blueprint upper section)
+    // DINING AREA (central area of blueprint)
     setTimeout(() => {
+      // Dining table with proper placement
+      addFurniture(apartment.id, 'dining_table', { x: 0, y: 0.4, z: -1.5 });
       
-      // Kitchen counters
+      // Six dining chairs around table (realistic placement)
+      addFurniture(apartment.id, 'chair', { x: -0.8, y: 0.5, z: -1.5 }); // Left side
+      addFurniture(apartment.id, 'chair', { x: 0.8, y: 0.5, z: -1.5 });  // Right side
+      addFurniture(apartment.id, 'chair', { x: 0, y: 0.5, z: -2.2 });    // Back
+      addFurniture(apartment.id, 'chair', { x: 0, y: 0.5, z: -0.8 });    // Front
+      addFurniture(apartment.id, 'chair', { x: -0.4, y: 0.5, z: -2.2 }); // Back corner
+      addFurniture(apartment.id, 'chair', { x: 0.4, y: 0.5, z: -0.8 });  // Front corner
+      
+      // Dining room sideboard/buffet
+      addFurniture(apartment.id, 'desk', { x: 1.5, y: 0.4, z: -3 });
+    }, 200);
+
+    // KITCHEN AREA (upper section of blueprint)
+    setTimeout(() => {
+      // L-shaped kitchen counter configuration
       createObject({
         type: 'furniture',
         category: 'furniture',
         subtype: 'counter',
-        name: 'Kitchen Counter',
-        position: { x: -3, y: 0.4, z: -4 },
-        scale: { x: 3, y: 0.8, z: 0.6 },
+        name: 'Main Kitchen Counter',
+        position: { x: -3.5, y: 0.4, z: -4.2 },
+        scale: { x: 4, y: 0.9, z: 0.7 },
         rotation: { x: 0, y: 0, z: 0 },
-        color: '#8B7355',
-        room: livingRoom.id
+        color: '#2C3E50',
+        room: apartment.id,
+        material: 'granite'
       });
 
-      // Refrigerator
+      // Island counter (as shown in blueprint)
+      createObject({
+        type: 'furniture',
+        category: 'furniture',
+        subtype: 'counter',
+        name: 'Kitchen Island',
+        position: { x: -1, y: 0.4, z: -3.5 },
+        scale: { x: 2.5, y: 0.9, z: 1.2 },
+        rotation: { x: 0, y: 0, z: 0 },
+        color: '#34495E',
+        room: apartment.id,
+        material: 'marble'
+      });
+
+      // High-end appliances
       createObject({
         type: 'furniture',
         category: 'furniture',
         subtype: 'refrigerator',
-        name: 'Refrigerator',
-        position: { x: -1, y: 1, z: -4 },
-        scale: { x: 0.6, y: 2, z: 0.6 },
+        name: 'French Door Refrigerator',
+        position: { x: -5.2, y: 1.1, z: -4.2 },
+        scale: { x: 0.7, y: 2.2, z: 0.7 },
         rotation: { x: 0, y: 0, z: 0 },
-        color: '#C0C0C0',
-        room: livingRoom.id
+        color: '#BDC3C7',
+        room: apartment.id,
+        material: 'stainless_steel'
       });
 
-      // Kitchen sink area
+      // Built-in oven and microwave
       createObject({
         type: 'furniture',
         category: 'furniture',
-        subtype: 'counter',
-        name: 'Sink Counter',
-        position: { x: 0, y: 0.4, z: -4.3 },
-        scale: { x: 1.5, y: 0.8, z: 0.4 },
+        subtype: 'oven',
+        name: 'Built-in Oven',
+        position: { x: -3, y: 0.8, z: -4.6 },
+        scale: { x: 0.6, y: 0.6, z: 0.5 },
         rotation: { x: 0, y: 0, z: 0 },
-        color: '#A0A0A0',
-        room: livingRoom.id
-      });
-    }, 200);
-
-    // Create bathroom (visible in blueprint)
-    setTimeout(() => {
-      
-      // Toilet
-      createObject({
-        type: 'furniture',
-        category: 'furniture',
-        subtype: 'toilet',
-        name: 'Toilet',
-        position: { x: 3, y: 0.4, z: -4 },
-        scale: { x: 0.6, y: 0.8, z: 0.8 },
-        rotation: { x: 0, y: 0, z: 0 },
-        color: '#FFFFFF',
-        room: livingRoom.id
+        color: '#2C3E50',
+        room: apartment.id,
+        material: 'stainless_steel'
       });
 
-      // Bathroom sink
+      // Kitchen sink with modern faucet
       createObject({
         type: 'furniture',
         category: 'furniture',
         subtype: 'sink',
-        name: 'Bathroom Sink',
-        position: { x: 3.5, y: 0.4, z: -3 },
-        scale: { x: 0.6, y: 0.8, z: 0.4 },
+        name: 'Double Kitchen Sink',
+        position: { x: -2, y: 0.5, z: -4.6 },
+        scale: { x: 1, y: 0.3, z: 0.6 },
         rotation: { x: 0, y: 0, z: 0 },
-        color: '#FFFFFF',
-        room: livingRoom.id
+        color: '#ECF0F1',
+        room: apartment.id,
+        material: 'ceramic'
       });
 
-      // Bathtub (visible in blueprint)
+      // Bar stools for island
+      addFurniture(apartment.id, 'chair', { x: -0.5, y: 0.7, z: -2.8 });
+      addFurniture(apartment.id, 'chair', { x: -1.5, y: 0.7, z: -2.8 });
+    }, 300);
+
+    // BATHROOM AREA (right section of blueprint)
+    setTimeout(() => {
+      // Modern toilet with realistic placement
+      createObject({
+        type: 'furniture',
+        category: 'furniture',
+        subtype: 'toilet',
+        name: 'Modern Toilet',
+        position: { x: 4.5, y: 0.4, z: -3.8 },
+        scale: { x: 0.7, y: 0.9, z: 0.9 },
+        rotation: { x: 0, y: Math.PI, z: 0 },
+        color: '#FFFFFF',
+        room: apartment.id,
+        material: 'ceramic'
+      });
+
+      // Vanity with double sink
+      createObject({
+        type: 'furniture',
+        category: 'furniture',
+        subtype: 'vanity',
+        name: 'Bathroom Vanity',
+        position: { x: 4.5, y: 0.4, z: -2.5 },
+        scale: { x: 1.5, y: 0.9, z: 0.6 },
+        rotation: { x: 0, y: 0, z: 0 },
+        color: '#34495E',
+        room: apartment.id,
+        material: 'wood'
+      });
+
+      // Large mirror above vanity
+      createObject({
+        type: 'plane',
+        category: 'furniture',
+        name: 'Bathroom Mirror',
+        position: { x: 4.5, y: 1.5, z: -2.8 },
+        scale: { x: 1.3, y: 1, z: 0.1 },
+        rotation: { x: 0, y: 0, z: 0 },
+        color: '#85C1E9',
+        room: apartment.id,
+        material: 'mirror'
+      });
+
+      // Luxury bathtub (as shown in blueprint)
       createObject({
         type: 'furniture',
         category: 'furniture',
         subtype: 'bathtub',
-        name: 'Bathtub',
-        position: { x: 2.5, y: 0.3, z: -4.5 },
-        scale: { x: 1.5, y: 0.6, z: 0.8 },
-        rotation: { x: 0, y: 0, z: 0 },
+        name: 'Freestanding Bathtub',
+        position: { x: 3.2, y: 0.3, z: -4.2 },
+        scale: { x: 1.8, y: 0.7, z: 0.9 },
+        rotation: { x: 0, y: Math.PI/4, z: 0 },
         color: '#FFFFFF',
-        room: livingRoom.id
+        room: apartment.id,
+        material: 'acrylic'
       });
-    }, 300);
 
-    // Add doors and windows based on blueprint
+      // Shower area
+      createObject({
+        type: 'cube',
+        category: 'furniture',
+        name: 'Shower Enclosure',
+        position: { x: 5.2, y: 1, z: -2 },
+        scale: { x: 0.1, y: 2, z: 1.2 },
+        rotation: { x: 0, y: 0, z: 0 },
+        color: '#85C1E9',
+        room: apartment.id,
+        material: 'glass'
+      });
+    }, 400);
+
+    // DOORS AND WINDOWS (structural elements from blueprint)
     setTimeout(() => {
-      
-      // Main entrance door
+      // Main entrance door with modern design
       createObject({
         type: 'door',
         category: 'structure',
-        name: 'Main Door',
-        position: { x: 0, y: 1, z: 3 - 0.1 },
-        scale: { x: 0.1, y: 2, z: 1 },
+        name: 'Main Entrance',
+        position: { x: -1, y: 1, z: 5 - 0.1 },
+        scale: { x: 0.1, y: 2.2, z: 1 },
         rotation: { x: 0, y: 0, z: 0 },
-        color: '#8B4513',
-        room: livingRoom.id,
-        isStructural: true
+        color: '#2C3E50',
+        room: apartment.id,
+        isStructural: true,
+        material: 'wood'
       });
 
-      // Bathroom door
+      // Bathroom pocket door
       createObject({
         type: 'door',
         category: 'structure',
         name: 'Bathroom Door',
-        position: { x: 2, y: 1, z: -2 },
+        position: { x: 3.3, y: 1, z: -1.5 },
         scale: { x: 0.8, y: 2, z: 0.1 },
         rotation: { x: 0, y: 0, z: 0 },
-        color: '#8B4513',
-        room: livingRoom.id,
-        isStructural: true
+        color: '#FFFFFF',
+        room: apartment.id,
+        isStructural: true,
+        material: 'wood'
       });
 
-      // Windows (multiple as shown in blueprint)
+      // Large living room windows (floor-to-ceiling)
       createObject({
         type: 'window',
         category: 'structure',
-        name: 'Living Room Window',
-        position: { x: -4 + 0.1, y: 1.5, z: 0 },
-        scale: { x: 0.1, y: 1, z: 2 },
+        name: 'Living Room Bay Window',
+        position: { x: -6 + 0.1, y: 1.2, z: 1 },
+        scale: { x: 0.1, y: 2.4, z: 3 },
         rotation: { x: 0, y: 0, z: 0 },
-        color: '#87CEEB',
-        room: livingRoom.id,
-        isStructural: true
+        color: '#85C1E9',
+        room: apartment.id,
+        isStructural: true,
+        material: 'glass'
       });
 
+      // Kitchen window above sink
       createObject({
         type: 'window',
         category: 'structure',
         name: 'Kitchen Window',
-        position: { x: -1, y: 1.5, z: -3 + 0.1 },
-        scale: { x: 1.5, y: 1, z: 0.1 },
+        position: { x: -2, y: 1.8, z: -5 + 0.1 },
+        scale: { x: 2, y: 1.2, z: 0.1 },
         rotation: { x: 0, y: 0, z: 0 },
-        color: '#87CEEB',
-        room: livingRoom.id,
-        isStructural: true
+        color: '#85C1E9',
+        room: apartment.id,
+        isStructural: true,
+        material: 'glass'
       });
-    }, 400);
+
+      // Bathroom window
+      createObject({
+        type: 'window',
+        category: 'structure',
+        name: 'Bathroom Window',
+        position: { x: 6 - 0.1, y: 1.8, z: -3 },
+        scale: { x: 0.1, y: 1, z: 1.2 },
+        rotation: { x: 0, y: 0, z: 0 },
+        color: '#85C1E9',
+        room: apartment.id,
+        isStructural: true,
+        material: 'glass'
+      });
+    }, 500);
+
+    // FINISHING TOUCHES AND REALISTIC DETAILS
+    setTimeout(() => {
+      // Floor textures and materials
+      createObject({
+        type: 'plane',
+        category: 'decoration',
+        name: 'Hardwood Flooring',
+        position: { x: -2, y: 0.01, z: 0 },
+        scale: { x: 8, y: 0.01, z: 6 },
+        rotation: { x: -Math.PI/2, y: 0, z: 0 },
+        color: '#8B4513',
+        room: apartment.id,
+        material: 'wood'
+      });
+
+      // Kitchen tile flooring
+      createObject({
+        type: 'plane',
+        category: 'decoration',
+        name: 'Kitchen Tile',
+        position: { x: -2.5, y: 0.01, z: -3.8 },
+        scale: { x: 4, y: 0.01, z: 2.5 },
+        rotation: { x: -Math.PI/2, y: 0, z: 0 },
+        color: '#BDC3C7',
+        room: apartment.id,
+        material: 'ceramic'
+      });
+
+      // Bathroom tile flooring
+      createObject({
+        type: 'plane',
+        category: 'decoration',
+        name: 'Bathroom Tile',
+        position: { x: 4.2, y: 0.01, z: -3.2 },
+        scale: { x: 2.5, y: 0.01, z: 2.8 },
+        rotation: { x: -Math.PI/2, y: 0, z: 0 },
+        color: '#F8F9FA',
+        room: apartment.id,
+        material: 'ceramic'
+      });
+
+      // Decorative lighting fixtures
+      createObject({
+        type: 'sphere',
+        category: 'decoration',
+        name: 'Pendant Light',
+        position: { x: 0, y: 2.5, z: -1.5 },
+        scale: { x: 0.3, y: 0.3, z: 0.3 },
+        rotation: { x: 0, y: 0, z: 0 },
+        color: '#F39C12',
+        room: apartment.id,
+        material: 'glass'
+      });
+    }, 600);
   };
 
   const handleDrag = (e: React.DragEvent) => {

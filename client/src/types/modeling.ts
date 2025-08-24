@@ -16,11 +16,17 @@ export interface ModelingObject {
   color: string;
   opacity?: number;
   modelPath?: string; // For imported models
-  material?: 'standard' | 'basic' | 'phong' | 'lambert';
+  material?: 'standard' | 'basic' | 'phong' | 'lambert' | 'wood' | 'metal' | 'glass' | 'fabric' | 'leather' | 'ceramic' | 'marble' | 'granite' | 'plastic' | 'stainless_steel' | 'acrylic' | 'mirror';
   wireframe?: boolean;
   visible?: boolean;
   room?: string; // Room assignment
   isStructural?: boolean; // For walls, floors, ceilings
+  gradient?: {
+    colors: string[];
+    direction: 'horizontal' | 'vertical' | 'radial';
+  };
+  isSelected?: boolean;
+  isDraggable?: boolean;
 }
 
 export interface SceneState {

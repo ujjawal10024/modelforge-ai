@@ -8,6 +8,7 @@ import { AIAssistant } from "./components/AIAssistant";
 import { ModelImporter } from "./components/ModelImporter";
 import { BlueprintImporter } from "./components/BlueprintImporter";
 import { RoomDesigner } from "./components/RoomDesigner";
+import { ObjectEditor } from "./components/ObjectEditor";
 import { Toolbar } from "./components/Toolbar";
 import { useModeling } from "./lib/stores/useModeling";
 import { useAudio } from "./lib/stores/useAudio";
@@ -390,6 +391,11 @@ function App() {
             </div>
           </div>
         </Card>
+      </div>
+
+      {/* Right Sidebar - Object Editor */}
+      <div className="absolute top-20 right-4 z-10 w-80">
+        <ObjectEditor />
       </div>
 
       {/* AI Assistant Modal */}
