@@ -93,7 +93,6 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         viewMode: 'viewMode' in useModeling() ? useModeling().viewMode : '3d',
         sceneInfo: {
           objectCount: objects.length,
-          roomCount: currentRoom ? 1 : 0,
           selectedObjectInfo: selectedObject ? {
             type: selectedObject.type,
             color: selectedObject.color,

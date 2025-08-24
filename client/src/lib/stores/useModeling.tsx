@@ -230,18 +230,36 @@ export const useModeling = create<ModelingState>()(
         bed: '#8B4513',
         chair: '#654321',
         table: '#D2691E',
+        dining_table: '#CD853F',
         sofa: '#4A4A4A',
         desk: '#8B7355',
-        wardrobe: '#696969'
+        wardrobe: '#696969',
+        tv_stand: '#2F4F4F',
+        counter: '#8B7355',
+        refrigerator: '#C0C0C0',
+        toilet: '#FFFFFF',
+        sink: '#F5F5F5',
+        bathtub: '#FFFFFF',
+        nightstand: '#654321',
+        bookshelf: '#8B4513'
       };
 
       const furnitureScales: Record<string, { x: number; y: number; z: number }> = {
         bed: { x: 2, y: 0.5, z: 1 },
         chair: { x: 0.5, y: 1, z: 0.5 },
         table: { x: 1.5, y: 0.8, z: 0.8 },
+        dining_table: { x: 2, y: 0.8, z: 1.2 },
         sofa: { x: 2, y: 0.8, z: 0.8 },
         desk: { x: 1.2, y: 0.8, z: 0.6 },
-        wardrobe: { x: 1, y: 2, z: 0.6 }
+        wardrobe: { x: 1, y: 2, z: 0.6 },
+        tv_stand: { x: 1.5, y: 0.6, z: 0.4 },
+        counter: { x: 2, y: 0.8, z: 0.6 },
+        refrigerator: { x: 0.6, y: 2, z: 0.6 },
+        toilet: { x: 0.6, y: 0.8, z: 0.8 },
+        sink: { x: 0.6, y: 0.8, z: 0.4 },
+        bathtub: { x: 1.5, y: 0.6, z: 0.8 },
+        nightstand: { x: 0.5, y: 0.6, z: 0.4 },
+        bookshelf: { x: 0.4, y: 2, z: 1.5 }
       };
 
       return get().createObject({
