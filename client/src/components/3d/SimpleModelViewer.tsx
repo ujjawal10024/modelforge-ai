@@ -39,6 +39,8 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
   const createGeometry = () => {
     switch (object.type) {
       case 'cube':
+      case 'wall':
+      case 'furniture':
         return <boxGeometry args={[1, 1, 1]} />;
       case 'sphere':
         return <sphereGeometry args={[0.5, 32, 32]} />;
@@ -49,7 +51,13 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
       case 'torus':
         return <torusGeometry args={[0.5, 0.2, 16, 32]} />;
       case 'plane':
+      case 'floor':
+      case 'ceiling':
         return <planeGeometry args={[1, 1]} />;
+      case 'door':
+        return <boxGeometry args={[0.1, 1, 0.8]} />;
+      case 'window':
+        return <boxGeometry args={[0.1, 0.6, 0.8]} />;
       default:
         return <boxGeometry args={[1, 1, 1]} />;
     }
@@ -65,15 +73,59 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
       baseColor.multiplyScalar(1.1);
     }
 
-    return (
-      <meshStandardMaterial
-        color={baseColor}
-        roughness={0.7}
-        metalness={0.1}
-        transparent={object.opacity !== undefined}
-        opacity={object.opacity || 1}
-      />
-    );
+    // Different materials for different object types
+    switch (object.type) {
+      case 'floor':
+        return (
+          <meshLambertMaterial
+            color={baseColor}
+            transparent={object.opacity !== undefined}
+            opacity={object.opacity || 1}
+          />
+        );
+      case 'wall':
+        return (
+          <meshLambertMaterial
+            color={baseColor}
+            transparent={object.opacity !== undefined}
+            opacity={object.opacity || 0.9}
+          />
+        );
+      case 'ceiling':
+        return (
+          <meshBasicMaterial
+            color={baseColor}
+            transparent={object.opacity !== undefined}
+            opacity={object.opacity || 0.8}
+          />
+        );
+      case 'window':
+        return (
+          <meshPhongMaterial
+            color={baseColor}
+            transparent={true}
+            opacity={0.3}
+          />
+        );
+      case 'door':
+        return (
+          <meshLambertMaterial
+            color={baseColor}
+            transparent={object.opacity !== undefined}
+            opacity={object.opacity || 1}
+          />
+        );
+      default:
+        return (
+          <meshStandardMaterial
+            color={baseColor}
+            roughness={0.7}
+            metalness={0.1}
+            transparent={object.opacity !== undefined}
+            opacity={object.opacity || 1}
+          />
+        );
+    }
   };
 
   // Handle imported models with actual GLB loading
@@ -81,15 +133,19 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
     return <ImportedGLBModel object={object} isSelected={isSelected} onSelect={handleClick} hovered={hovered} setHovered={setHovered} />;
   }
 
+  // Special handling for floor objects (should be rotated)
+  const isFloor = object.type === 'floor';
+  const floorRotation = isFloor ? [-Math.PI / 2, 0, 0] : [object.rotation.x, object.rotation.y, object.rotation.z];
+
   return (
     <group
       position={[object.position.x, object.position.y, object.position.z]}
-      rotation={[object.rotation.x, object.rotation.y, object.rotation.z]}
+      rotation={floorRotation}
       scale={[object.scale.x, object.scale.y, object.scale.z]}
     >
       <mesh
         ref={meshRef}
-        castShadow
+        castShadow={object.type !== 'floor'}
         receiveShadow
         onClick={handleClick}
         onPointerOver={handlePointerOver}
@@ -115,9 +171,9 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
       {/* Object label */}
       {(isSelected || hovered) && (
         <Text
-          position={[0, 1.2, 0]}
-          fontSize={0.3}
-          color="#ffffff"
+          position={[0, isFloor ? 0.2 : 1.2, 0]}
+          fontSize={isFloor ? 0.2 : 0.3}
+          color={isFloor ? "#333333" : "#ffffff"}
           anchorX="center"
           anchorY="middle"
         >

@@ -2,28 +2,36 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, useState, useCallback } from "react";
 import "@fontsource/inter";
 import { SimpleScene } from "./components/3d/SimpleScene";
+import { FloorPlanView } from "./components/2d/FloorPlanView";
 import { CommandPanel } from "./components/CommandPanel";
 import { AIAssistant } from "./components/AIAssistant";
 import { ModelImporter } from "./components/ModelImporter";
+import { BlueprintImporter } from "./components/BlueprintImporter";
+import { RoomDesigner } from "./components/RoomDesigner";
 import { Toolbar } from "./components/Toolbar";
 import { useModeling } from "./lib/stores/useModeling";
 import { useAudio } from "./lib/stores/useAudio";
 import { Button } from "./components/ui/button";
 import { Card } from "./components/ui/card";
-import { Volume2, VolumeX, Box, Orbit, Upload, Bot } from "lucide-react";
+import { Volume2, VolumeX, Box, Orbit, Upload, Bot, Building, Home, Eye, Map } from "lucide-react";
 
 function App() {
   const { 
     selectedObject, 
     objects, 
+    currentRoom,
+    viewMode,
     createObject, 
     clearScene, 
     duplicateObject, 
-    deleteObject 
+    deleteObject,
+    setViewMode
   } = useModeling();
   const { toggleMute, isMuted } = useAudio();
   const [showAI, setShowAI] = useState(false);
   const [showImporter, setShowImporter] = useState(false);
+  const [showBlueprint, setShowBlueprint] = useState(false);
+  const [showRoomDesigner, setShowRoomDesigner] = useState(false);
 
   const handleCanvasClick = useCallback((event: React.MouseEvent) => {
     // Prevent deselection when clicking on UI elements
@@ -78,20 +86,55 @@ function App() {
             </div>
             <div>
               <h1 className="text-white font-bold text-lg">Precision Build AI</h1>
-              <p className="text-gray-400 text-xs">3D Modeling Platform</p>
+              <p className="text-gray-400 text-xs">Room Design & Construction Planning</p>
             </div>
           </div>
           
-          {/* Quick Stats */}
+          {/* View Mode & Stats */}
           <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === '3d' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('3d')}
+                className={viewMode === '3d' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'text-gray-300 hover:bg-white/20'
+                }
+              >
+                <Box size={16} className="mr-1" />
+                3D
+              </Button>
+              <Button
+                variant={viewMode === '2d' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('2d')}
+                className={viewMode === '2d' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'text-gray-300 hover:bg-white/20'
+                }
+              >
+                <Map size={16} className="mr-1" />
+                2D
+              </Button>
+            </div>
+            
             <div className="text-gray-300">
               <span className="text-blue-400">{objects.length}</span> Objects
             </div>
-            {selectedObject && (
+            
+            {currentRoom && (
               <div className="text-gray-300">
-                Selected: <span className="text-green-400 capitalize">{selectedObject.type}</span>
+                Room: <span className="text-green-400">{currentRoom.name}</span>
               </div>
             )}
+            
+            {selectedObject && (
+              <div className="text-gray-300">
+                Selected: <span className="text-yellow-400 capitalize">{selectedObject.type}</span>
+              </div>
+            )}
+            
             <Button
               variant="ghost"
               size="sm"
@@ -104,30 +147,58 @@ function App() {
         </div>
       </div>
 
-      {/* Main 3D Canvas */}
+      {/* Main View */}
       <div className="absolute inset-0 pt-16" onClick={handleCanvasClick}>
-        <Canvas
-          shadows
-          camera={{
-            position: [10, 10, 10],
-            fov: 50,
-            near: 0.1,
-            far: 1000
-          }}
-          gl={{
-            antialias: true,
-            powerPreference: "high-performance"
-          }}
-        >
-          <color attach="background" args={["#0f0f23"]} />
-          <Suspense fallback={null}>
-            <SimpleScene />
-          </Suspense>
-        </Canvas>
+        {viewMode === '3d' ? (
+          <Canvas
+            shadows
+            camera={{
+              position: [10, 10, 10],
+              fov: 50,
+              near: 0.1,
+              far: 1000
+            }}
+            gl={{
+              antialias: true,
+              powerPreference: "high-performance"
+            }}
+          >
+            <color attach="background" args={["#0f0f23"]} />
+            <Suspense fallback={null}>
+              <SimpleScene />
+            </Suspense>
+          </Canvas>
+        ) : (
+          <FloorPlanView />
+        )}
       </div>
 
       {/* Left Sidebar - Tools */}
       <div className="absolute top-20 left-4 z-10 space-y-3">
+        <Card className="bg-black/80 border-blue-500/30 backdrop-blur-sm">
+          <div className="p-3">
+            <h3 className="text-white font-semibold mb-3 text-sm">Room Design</h3>
+            <div className="space-y-2">
+              <Button
+                onClick={() => setShowBlueprint(true)}
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white"
+                size="sm"
+              >
+                <Building size={16} className="mr-2" />
+                Import Blueprint
+              </Button>
+              <Button
+                onClick={() => setShowRoomDesigner(true)}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                size="sm"
+              >
+                <Home size={16} className="mr-2" />
+                Room Designer
+              </Button>
+            </div>
+          </div>
+        </Card>
+
         <Card className="bg-black/80 border-blue-500/30 backdrop-blur-sm">
           <div className="p-3">
             <h3 className="text-white font-semibold mb-3 text-sm">Create Objects</h3>
@@ -337,6 +408,22 @@ function App() {
         />
       )}
 
+      {/* Blueprint Importer Modal */}
+      {showBlueprint && (
+        <BlueprintImporter
+          isOpen={showBlueprint}
+          onClose={() => setShowBlueprint(false)}
+        />
+      )}
+
+      {/* Room Designer Modal */}
+      {showRoomDesigner && (
+        <RoomDesigner
+          isOpen={showRoomDesigner}
+          onClose={() => setShowRoomDesigner(false)}
+        />
+      )}
+
       {/* Interactive Help Panel */}
       <div className="absolute bottom-20 left-4 z-10">
         <Card className="bg-black/80 border-blue-500/30 backdrop-blur-sm">
@@ -346,11 +433,11 @@ function App() {
               Quick Guide
             </h4>
             <div className="text-gray-300 text-xs space-y-1">
-              <div>💬 <strong>Commands:</strong> "create cube red", "make it bigger"</div>
+              <div>🏠 <strong>Rooms:</strong> Import blueprints or create room templates</div>
+              <div>🪑 <strong>Furniture:</strong> Use room designer to add furniture</div>
+              <div>💬 <strong>AI Commands:</strong> "create bedroom 4x5 meters", "add sofa"</div>
               <div>🖱️ <strong>Controls:</strong> Click to select, drag to orbit, scroll to zoom</div>
-              <div>⌨️ <strong>Shortcuts:</strong> R = rotate mode, S = scale mode, Esc = deselect</div>
-              <div>🤖 <strong>AI:</strong> Use natural language with the AI assistant</div>
-              <div>📁 <strong>Import:</strong> Drag & drop GLB/GLTF files from Sketchfab</div>
+              <div>📐 <strong>Views:</strong> Switch between 2D floor plan and 3D room view</div>
             </div>
           </div>
         </Card>

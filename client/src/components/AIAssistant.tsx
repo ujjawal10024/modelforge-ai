@@ -29,7 +29,16 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { createObject, objects, selectedObject, updateObject } = useModeling();
+  const { 
+    createObject, 
+    objects, 
+    selectedObject, 
+    updateObject,
+    currentRoom,
+    createRoom,
+    addFurniture,
+    setViewMode
+  } = useModeling();
   const { playSuccess } = useAudio();
 
   // Initial welcome message
@@ -38,15 +47,15 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
       const welcomeMessage: Message = {
         id: '1',
         type: 'ai',
-        content: "Welcome to Precision Build AI! I'm your intelligent 3D modeling assistant. I can help you create professional 3D models using simple natural language commands. Try commands like 'Create a red cube', 'Make it bigger', or 'Build a house'. I can also help you work with imported models!",
+        content: "Welcome to Precision Build AI! I'm your intelligent room design and construction planning assistant. I can help you create room layouts, add furniture, import blueprints, and visualize construction plans in both 2D and 3D. Try commands like 'Create bedroom 4x5 meters', 'Add a sofa', or 'Switch to 2D view'.",
         timestamp: new Date(),
         suggestions: [
-          "Create a red cube",
-          "Add a blue sphere",
-          "Make it bigger",
-          "Change color to green",
-          "Build a simple house",
-          "Import a 3D model"
+          "Create bedroom 4x5 meters",
+          "Create living room",
+          "Add a sofa",
+          "Add furniture",
+          "Switch to 2D view",
+          "Add door and window"
         ]
       };
       setMessages([welcomeMessage]);
@@ -80,8 +89,11 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
       const aiResponse = await generateAIResponse(currentInput, {
         objects,
         selectedObject,
+        currentRoom,
+        viewMode: 'viewMode' in useModeling() ? useModeling().viewMode : '3d',
         sceneInfo: {
           objectCount: objects.length,
+          roomCount: currentRoom ? 1 : 0,
           selectedObjectInfo: selectedObject ? {
             type: selectedObject.type,
             color: selectedObject.color,
