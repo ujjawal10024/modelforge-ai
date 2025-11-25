@@ -14,68 +14,64 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
   const [hovered, setHovered] = useState(false);
   const { selectedObject, selectObject } = useModeling();
   const { playHit } = useAudio();
-  
+
   const isSelected = selectedObject?.id === object.id;
 
-  const handleClick = (e: any) => {
-    e.stopPropagation();
+  // Unified safe click handler
+  const handleClick = (e?: React.MouseEvent) => {
+    e?.stopPropagation(); // safe even if e is undefined
     selectObject(object.id);
     playHit();
   };
 
-  const handlePointerOver = (e: any) => {
-    e.stopPropagation();
+  const handlePointerOver = (e?: React.PointerEvent) => {
+    e?.stopPropagation();
     setHovered(true);
-    document.body.style.cursor = 'pointer';
+    document.body.style.cursor = "pointer";
   };
 
-  const handlePointerOut = (e: any) => {
-    e.stopPropagation();
+  const handlePointerOut = (e?: React.PointerEvent) => {
+    e?.stopPropagation();
     setHovered(false);
-    document.body.style.cursor = 'auto';
+    document.body.style.cursor = "auto";
   };
 
-  // Create geometry based on object type
+  // Create geometry
   const createGeometry = () => {
     switch (object.type) {
-      case 'cube':
-      case 'wall':
-      case 'furniture':
+      case "cube":
+      case "wall":
+      case "furniture":
         return <boxGeometry args={[1, 1, 1]} />;
-      case 'sphere':
+      case "sphere":
         return <sphereGeometry args={[0.5, 32, 32]} />;
-      case 'cylinder':
+      case "cylinder":
         return <cylinderGeometry args={[0.5, 0.5, 1, 32]} />;
-      case 'cone':
+      case "cone":
         return <coneGeometry args={[0.5, 1, 32]} />;
-      case 'torus':
+      case "torus":
         return <torusGeometry args={[0.5, 0.2, 16, 32]} />;
-      case 'plane':
-      case 'floor':
-      case 'ceiling':
+      case "plane":
+      case "floor":
+      case "ceiling":
         return <planeGeometry args={[1, 1]} />;
-      case 'door':
+      case "door":
         return <boxGeometry args={[0.1, 1, 0.8]} />;
-      case 'window':
+      case "window":
         return <boxGeometry args={[0.1, 0.6, 0.8]} />;
       default:
         return <boxGeometry args={[1, 1, 1]} />;
     }
   };
 
-  // Create material with object color
+  // Create material
   const createMaterial = () => {
     const baseColor = new THREE.Color(object.color);
-    
-    if (isSelected) {
-      baseColor.multiplyScalar(1.3);
-    } else if (hovered) {
-      baseColor.multiplyScalar(1.1);
-    }
+    if (isSelected) baseColor.multiplyScalar(1.3);
+    else if (hovered) baseColor.multiplyScalar(1.1);
 
-    // Different materials for different object types
     switch (object.type) {
-      case 'floor':
+      case "floor":
         return (
           <meshLambertMaterial
             color={baseColor}
@@ -83,7 +79,7 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
             opacity={object.opacity || 1}
           />
         );
-      case 'wall':
+      case "wall":
         return (
           <meshLambertMaterial
             color={baseColor}
@@ -91,7 +87,7 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
             opacity={object.opacity || 0.9}
           />
         );
-      case 'ceiling':
+      case "ceiling":
         return (
           <meshBasicMaterial
             color={baseColor}
@@ -99,15 +95,9 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
             opacity={object.opacity || 0.8}
           />
         );
-      case 'window':
-        return (
-          <meshPhongMaterial
-            color={baseColor}
-            transparent={true}
-            opacity={0.3}
-          />
-        );
-      case 'door':
+      case "window":
+        return <meshPhongMaterial color={baseColor} transparent opacity={0.3} />;
+      case "door":
         return (
           <meshLambertMaterial
             color={baseColor}
@@ -128,14 +118,23 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
     }
   };
 
-  // Handle imported models with actual GLB loading
-  if (object.type === 'imported' && object.modelPath) {
-    return <ImportedGLBModel object={object} isSelected={isSelected} onSelect={handleClick} hovered={hovered} setHovered={setHovered} />;
+  // Special handling for imported GLB models
+  if (object.type === "imported" && object.modelPath) {
+    return (
+      <ImportedGLBModel
+        object={object}
+        isSelected={isSelected}
+        onSelect={handleClick}
+        hovered={hovered}
+        setHovered={setHovered}
+      />
+    );
   }
 
-  // Special handling for floor objects (should be rotated)
-  const isFloor = object.type === 'floor';
-  const floorRotation = isFloor ? [-Math.PI / 2, 0, 0] : [object.rotation.x, object.rotation.y, object.rotation.z];
+  const isFloor = object.type === "floor";
+  const floorRotation = isFloor
+    ? [-Math.PI / 2, 0, 0]
+    : [object.rotation.x, object.rotation.y, object.rotation.z];
 
   return (
     <group
@@ -145,7 +144,7 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
     >
       <mesh
         ref={meshRef}
-        castShadow={object.type !== 'floor'}
+        castShadow={object.type !== "floor"}
         receiveShadow
         onClick={handleClick}
         onPointerOver={handlePointerOver}
@@ -159,12 +158,7 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
       {isSelected && (
         <mesh>
           {createGeometry()}
-          <meshBasicMaterial
-            color="#00ff00"
-            transparent
-            opacity={0.2}
-            side={THREE.BackSide}
-          />
+          <meshBasicMaterial color="#00ff00" transparent opacity={0.2} side={THREE.BackSide} />
         </mesh>
       )}
 
@@ -184,13 +178,13 @@ export function SimpleModelViewer({ object }: SimpleModelViewerProps) {
   );
 }
 
-// Component for imported GLB models
-function ImportedGLBModel({ 
-  object, 
-  isSelected, 
-  onSelect, 
-  hovered, 
-  setHovered 
+// Imported GLB component (event-safe)
+function ImportedGLBModel({
+  object,
+  isSelected,
+  onSelect,
+  hovered,
+  setHovered,
 }: {
   object: ModelingObject;
   isSelected: boolean;
@@ -200,23 +194,14 @@ function ImportedGLBModel({
 }) {
   try {
     const { scene } = useGLTF(object.modelPath!);
-    
-    if (!scene) {
-      return <FallbackModel object={object} isSelected={isSelected} onSelect={onSelect} hovered={hovered} setHovered={setHovered} />;
-    }
+    if (!scene) throw new Error("Scene not loaded");
 
-    // Clone the scene to avoid conflicts
     const clonedScene = scene.clone();
-    
-    // Set up shadows and ensure proper rendering
     clonedScene.traverse((child: any) => {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
-        // Preserve original materials
-        if (child.material) {
-          child.material.needsUpdate = true;
-        }
+        if (child.material) child.material.needsUpdate = true;
       }
     });
 
@@ -228,61 +213,56 @@ function ImportedGLBModel({
       >
         <primitive
           object={clonedScene}
-          onClick={(e: any) => {
+          onClick={(e) => {
             e.stopPropagation();
             onSelect();
           }}
-          onPointerOver={(e: any) => {
+          onPointerOver={(e) => {
             e.stopPropagation();
             setHovered(true);
-            document.body.style.cursor = 'pointer';
+            document.body.style.cursor = "pointer";
           }}
-          onPointerOut={(e: any) => {
+          onPointerOut={(e) => {
             e.stopPropagation();
             setHovered(false);
-            document.body.style.cursor = 'auto';
+            document.body.style.cursor = "auto";
           }}
         />
 
-        {/* Selection outline */}
         {isSelected && (
           <mesh>
             <boxGeometry args={[3, 3, 3]} />
-            <meshBasicMaterial
-              color="#00ff00"
-              transparent
-              opacity={0.15}
-              wireframe
-            />
+            <meshBasicMaterial color="#00ff00" transparent opacity={0.15} wireframe />
           </mesh>
         )}
 
-        {/* Object label */}
         {(isSelected || hovered) && (
-          <Text
-            position={[0, 2.5, 0]}
-            fontSize={0.3}
-            color="#ffffff"
-            anchorX="center"
-            anchorY="middle"
-          >
+          <Text position={[0, 2.5, 0]} fontSize={0.3} color="#ffffff" anchorX="center" anchorY="middle">
             {object.name || `Model ${object.id.slice(-4)}`}
           </Text>
         )}
       </group>
     );
-  } catch (error) {
-    return <FallbackModel object={object} isSelected={isSelected} onSelect={onSelect} hovered={hovered} setHovered={setHovered} />;
+  } catch {
+    return (
+      <FallbackModel
+        object={object}
+        isSelected={isSelected}
+        onSelect={onSelect}
+        hovered={hovered}
+        setHovered={setHovered}
+      />
+    );
   }
 }
 
-// Fallback component for failed GLB loads
-function FallbackModel({ 
-  object, 
-  isSelected, 
-  onSelect, 
-  hovered, 
-  setHovered 
+// Fallback GLB loader
+function FallbackModel({
+  object,
+  isSelected,
+  onSelect,
+  hovered,
+  setHovered,
 }: {
   object: ModelingObject;
   isSelected: boolean;
@@ -299,32 +279,26 @@ function FallbackModel({
       <mesh
         castShadow
         receiveShadow
-        onClick={(e: any) => {
+        onClick={(e) => {
           e.stopPropagation();
           onSelect();
         }}
-        onPointerOver={(e: any) => {
+        onPointerOver={(e) => {
           e.stopPropagation();
           setHovered(true);
-          document.body.style.cursor = 'pointer';
+          document.body.style.cursor = "pointer";
         }}
-        onPointerOut={(e: any) => {
+        onPointerOut={(e) => {
           e.stopPropagation();
           setHovered(false);
-          document.body.style.cursor = 'auto';
+          document.body.style.cursor = "auto";
         }}
       >
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color="#ff6b6b" />
       </mesh>
 
-      <Text
-        position={[0, 1.5, 0]}
-        fontSize={0.2}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-      >
+      <Text position={[0, 1.5, 0]} fontSize={0.2} color="#ffffff" anchorX="center" anchorY="middle">
         Model Load Failed
       </Text>
     </group>
