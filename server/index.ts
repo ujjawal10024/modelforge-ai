@@ -54,9 +54,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Serve the app on port 5000
-  const port = 5000;
-  server.listen(port, "0.0.0.0", () => {
-    log(`Serving on http://localhost:${port}`);
-  });
+  const PORT = process.env.PORT ? Number(process.env.PORT) : 5000;
+
+app.listen(PORT, () => {
+  console.log(`Serving on http://localhost:${PORT}`);
+});
+
 })();
